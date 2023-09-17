@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="shortcut icon"
+        href="https://png.pngtree.com/png-vector/20201123/ourmid/pngtree-letter-s-floral-logo-png-image_2468715.jpg"
+        type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
+    <title>client</title>
+    <style>
+        *{
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: cursive;
+}
+
+.nav {
+    background: black;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80px;
+}
+
+.logo-text{
+    color: white;
+    font-size: xx-large;
+}
+
+.container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.msg-container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    width: 600px;
+    height: 515px;
+    border: 4px solid black;
+}
+
+#input-container {
+    position: absolute;
+    bottom: 0;
+    display: flex;
+}
+
+#msg-input {
+    width: 520px;
+    height: 30px;
+    font-family: cursive;
+}
+
+#msg-btn {
+    width: 80px;
+    background: #000;
+    color: white;
+    border: none;
+}
+
+.msg-box {
+    width: 100%;
+    height: 100%;
+    overflow: scroll;
+}
+.messages{
+    overflow-y: auto;
+    height: 95%;
+}
+.message {
+    background-color: grey;
+    width: 35%;
+    padding: 10px;
+    margin: 17px 17px;
+    border: 2px solid black;
+    border-radius: 32px;
+}
+
+.left {
+    float: left;
+    clear: both;
+}
+
+.right {
+    float: right;
+    clear: both;
+}
+@media screen and (max-width: 600px) {
+    #msg-input {
+        width: 80%; /* Adjust width for smaller screens */
+    }
+
+    #msg-btn {
+        width: 20%; /* Adjust width for smaller screens */
+    }
+}
+
+/* Medium screens (e.g., tablets) */
+@media screen and (min-width: 601px) and (max-width: 1024px) {
+    #msg-input {
+        width: 60%; /* Adjust width for medium screens */
+    }
+
+    #msg-btn {
+        width: 15%; /* Adjust width for medium screens */
+    }
+}
+    </style>
+</head>
+
+<body>
+    <nav class="nav">
+        <span class="logo-text">Sharjeels chat</span>
+    </nav>
+    <div class="container">
+        <div class="msg-container">
+            <div class="messages">
+                <!-- <div class="message right">aqsa: how are you</div>
+                <div class="message left">Hamza: how are you</div> -->
+            </div>
+            <form id="input-container">
+                <input id="msg-input" type="text" name="message">
+                <button id="msg-btn">send</button>
+            </form>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const input = document.getElementById("msg-input");
+        const msgContainer = document.querySelector('.messages');
+        const inputContainer = document.getElementById("input-container");
+        const btn = document.getElementById("msg-btn");
+        
+        const appendJoinedMessage = (message, position) => {
+            const messegeElement = document.createElement('div');
+            messegeElement.innerText = message;
+            messegeElement.classList.add('message');
+            messegeElement.classList.add(position);
+            msgContainer.append(messegeElement);
+        };
+        inputContainer.addEventListener('submit', e => {
+            e.preventDefault();
+            const message = input.value;
+            appendJoinedMessage(`You: ${message} `, 'left');
+            socket.emit('send', message);
+            input.value = '';
+        });
+
+        const userName = prompt("enter your name to chat");
+
+        socket.emit("new-user-joined", userName);
+
+        socket.on('user-joined', name => {
+            appendJoinedMessage(`${name}: joined the chat`, "right");
+        });
+
+        socket.on('recieve', data => {
+            appendJoinedMessage(`${data.name}: ${data.message}`, 'right');
+        });
+
+        socket.on('left', name => {
+            appendJoinedMessage(`${name}: left the chat`, 'right');
+        });
+    </script>
+</body>
+
+</html>
